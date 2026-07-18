@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>CM Support — AI Customer Support</title>
+<link rel="manifest" href="/manifest.json" />
+<meta name="theme-color" content="#FF9933" />
+<style>
+  :root{
+    --saffron:#FF9933; --saffron-deep:#E9700A; --saffron-soft:#FFF1E0;
+    --green:#138808; --green-deep:#0E6606; --green-soft:#E8F5E4;
+    --navy:#000080; --ink:#1A1A2E; --off:#FCFAF7;
+  }
+  *{box-sizing:border-box;margin:0}
+  body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:var(--off);color:var(--ink);
+       max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+  header{background:linear-gradient(135deg,var(--saffron),var(--saffron-deep));color:#fff;
+         padding:16px 18px 14px;border-radius:0 0 22px 22px;box-shadow:0 6px 20px rgba(233,112,10,.28)}
+  .hrow{display:flex;align-items:center;gap:11px}
+  .chakra{width:44px;height:44px;border-radius:14px;background:#fff;display:grid;place-items:center}
+  .chakra svg{width:28px;height:28px}
+  .spin svg{animation:spin 6s linear infinite}
+  h1{font-size:17px;font-weight:800;letter-spacing:-.2px}
+  .sub{font-size:11.5px;opacity:.95;display:flex;align-items:center;gap:5px}
+  .dot{width:7px;height:7px;border-radius:99px;background:#B9F5A8}
+  .band{display:flex;height:4px;border-radius:4px;overflow:hidden;margin:0 26px}
+  .band i{flex:1}.band i:nth-child(1){background:var(--saffron)}
+  .band i:nth-child(2){background:#fff;border-top:1px solid #eee;border-bottom:1px solid #eee}
+  .band i:nth-child(3){background:var(--green)}
+  #chat{flex:1;overflow-y:auto;padding:14px 14px 10px}
+  .row{display:flex;gap:8px;margin-bottom:12px;animation:pop .25s ease}
+  .row.user{flex-direction:row-reverse}
+  .av{width:30px;height:30px;border-radius:10px;flex-shrink:0;display:grid;place-items:center;font-size:15px}
+  .row.bot .av{background:linear-gradient(135deg,var(--saffron),var(--saffron-deep));color:#fff}
+  .row.user .av{background:#E6E6F5;color:var(--navy)}
+  .bubble{max-width:78%;padding:10px 14px;font-size:13.5px;line-height:1.55;white-space:pre-wrap;
+          box-shadow:0 2px 10px rgba(26,26,46,.06)}
+  .row.bot .bubble{background:#fff;border:1px solid #F1EEE8;border-radius:16px 16px 16px 4px}
+  .row.user .bubble{background:var(--navy);color:#fff;border-radius:16px 16px 4px 16px}
+  .chip{margin-top:6px;background:#fff;border-radius:14px;padding:9px 12px;font-size:11.5px;
+        border:1px solid #eee;color:#444;box-shadow:0 2px 10px rgba(26,26,46,.05)}
+  .chip b{font-size:12.5px;color:var(--ink);display:block}
+  .quick{display:flex;gap:7px;flex-wrap:wrap;padding:2px 14px 10px}
+  .quick button{border:1px solid #ff993355;background:#fff;color:var(--saffron-deep);border-radius:99px;
+        padding:6px 12px;font-size:11.5px;font-weight:700;cursor:pointer}
+  .composer{position:sticky;bottom:0;padding:8px 12px calc(12px + env(safe-area-inset-bottom));
+        background:linear-gradient(#FCFAF700,var(--off) 30%)}
+  .box{display:flex;gap:8px;background:#fff;border-radius:16px;padding:6px 6px 6px 16px;
+       box-shadow:0 4px 18px rgba(26,26,46,.10);border:1px solid var(--saffron-soft)}
+  input{flex:1;border:none;outline:none;font-size:14px;background:transparent;color:var(--ink)}
+  .send{width:40px;height:40px;border-radius:12px;border:none;cursor:pointer;color:#fff;
+        background:linear-gradient(135deg,var(--green),var(--green-deep));display:grid;place-items:center}
+  .send:disabled{background:#A7D69C}
+  .typing span{display:inline-block;width:6px;height:6px;border-radius:99px;margin-right:4px;animation:pulse 1s infinite}
+  .typing span:nth-child(1){background:var(--saffron)}
+  .typing span:nth-child(2){background:var(--navy);animation-delay:.2s}
+  .typing span:nth-child(3){background:var(--green);animation-delay:.4s}
+  @keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+  @keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <div class="chakra" id="chakra">
+      <svg viewBox="0 0 100 100"><g stroke="#000080" fill="none" stroke-width="6">
+        <circle cx="50" cy="50" r="46"/></g><circle cx="50" cy="50" r="8" fill="#000080"/>
+        <g stroke="#000080" stroke-width="3" id="spokes"></g></svg>
+    </div>
+    <div style="flex:1">
+      <h1>CM Support</h1>
+      <div class="sub"><span class="dot"></span> Common Support · KB: Constitution of India 2024</div>
+    </div>
+  </div>
+</header>
+<div class="band"><i></i><i></i><i></i></div>
+
+<div id="chat"></div>
+<div class="quick" id="quick"></div>
+<div class="composer">
+  <div class="box">
+    <input id="inp" placeholder="Ask about any Article, order, issue…" />
+    <button class="send" id="btn">➤</button>
+  </div>
+</div>
+
+<script>
+const g = document.getElementById('spokes');
+for (let i=0;i<24;i++){const a=i*15*Math.PI/180;
+  g.innerHTML += `<line x1="50" y1="50" x2="${50+42*Math.cos(a)}" y2="${50+42*Math.sin(a)}"/>`;}
+
+const chat = document.getElementById('chat');
+const inp = document.getElementById('inp');
+const btn = document.getElementById('btn');
+const chakra = document.getElementById('chakra');
+const messages = [];
+const QUICK = ["What is the Preamble?","Explain Article 21","What are Fundamental Duties?",
+               "Where is my order #12345?","Talk to a human agent"];
+
+function add(role, text, extra){
+  messages.push({role, text});
+  const row = document.createElement('div');
+  row.className = 'row ' + (role==='user'?'user':'bot');
+  row.innerHTML = `<div class="av">${role==='user'?'🙂':'🤖'}</div>
+    <div><div class="bubble"></div>${extra||''}</div>`;
+  row.querySelector('.bubble').textContent = text;
+  chat.appendChild(row); chat.scrollTop = chat.scrollHeight;
+}
+function typing(on){
+  document.getElementById('typ')?.remove();
+  if(on){const d=document.createElement('div');d.id='typ';d.className='row bot';
+    d.innerHTML='<div class="av">🤖</div><div class="bubble typing"><span></span><span></span><span></span></div>';
+    chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
+  chakra.classList.toggle('spin', on);
+}
+
+async function send(text){
+  text = (text ?? inp.value).trim();
+  if(!text) return;
+  inp.value=''; add('user', text); typing(true); btn.disabled=true;
+  try{
+    const r = await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({messages: messages.slice(-12)})});
+    const d = await r.json(); typing(false);
+    let extra='';
+    if(d.ticket) extra=`<div class="chip"><b>${d.action==='escalate'?'⚠️ Escalated to human agent':'🎫 Ticket created'}</b>
+      ${d.ticket.id} · ${d.ticket.category} · ${d.ticket.priority} priority</div>`;
+    if(d.order) extra=`<div class="chip"><b>📦 Order #${d.order.id}</b>${d.order.status} · ETA ${d.order.eta}</div>`;
+    add('assistant', d.reply, extra);
+  }catch(e){ typing(false); add('assistant','Network hiccup — please try again.'); }
+  btn.disabled=false;
+}
+
+document.getElementById('quick').innerHTML =
+  QUICK.map(q=>`<button onclick="send('${q.replace(/'/g,"\\'")}')">${q}</button>`).join('');
+btn.onclick = ()=>send();
+inp.onkeydown = e=>{ if(e.key==='Enter') send(); };
+
+add('assistant',"Namaste 🙏 Welcome to CM Support (Common Support). My knowledge base is the Constitution of India (updated to the 106th Amendment, 2023). Ask me about any Article, track an order, or I can connect you to a human agent.");
+
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+</script>
+</body>
+</html>

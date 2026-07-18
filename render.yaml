@@ -1,0 +1,17 @@
+# Render Blueprint — deploy with one click after pushing to GitHub
+services:
+  - type: web
+    name: cm-support
+    runtime: python
+    plan: free
+    # Build: install deps THEN build the Chroma index from the PDF at build time,
+    # so the knowledge base ships inside the deploy (free tier disk is ephemeral).
+    buildCommand: pip install -r requirements.txt && python ingest.py
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GROQ_API_KEY
+        sync: false          # you paste this in the Render dashboard
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: PYTHON_VERSION
+        value: 3.11.9

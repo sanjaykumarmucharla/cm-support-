@@ -1,0 +1,11 @@
+{
+  "name": "CM Support — AI Customer Support",
+  "short_name": "CM Support",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FCFAF7",
+  "theme_color": "#FF9933",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
